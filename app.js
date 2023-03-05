@@ -1,10 +1,10 @@
 import { PrismaClient } from "@prisma/client"
 import express, { json, urlencoded } from "express"
 import morgan from "morgan"
-import makeMenuRoutes from "./routes/navigationMenu.js"
-import makePageRoutes from "./routes/page.js"
-import makeRoleRoutes from "./routes/role.js"
-import makeUserRoutes from "./routes/user.js"
+import makeMenuRoutes from "./src/routes/navigationMenu.js"
+import makePageRoutes from "./src/routes/page.js"
+import makeRoleRoutes from "./src/routes/role.js"
+import makeUserRoutes from "./src/routes/user.js"
 const prisma = new PrismaClient()
 
 const app = express()
