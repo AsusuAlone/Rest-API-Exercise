@@ -4,6 +4,7 @@ import morgan from "morgan"
 import makeMenuRoutes from "./src/routes/navigationMenu.js"
 import makePageRoutes from "./src/routes/page.js"
 import makeRoleRoutes from "./src/routes/role.js"
+import makeUserSignRoutes from "./src/routes/sign.js"
 import makeUserRoutes from "./src/routes/user.js"
 const prisma = new PrismaClient()
 
@@ -16,6 +17,7 @@ makeUserRoutes({ app })
 makeRoleRoutes({ app })
 makePageRoutes({ app })
 makeMenuRoutes({ app })
+makeUserSignRoutes({ app })
 
 app.get("/", async (req, res, next) => {
   res.send({ message: "Awesome it works 🐻" })
