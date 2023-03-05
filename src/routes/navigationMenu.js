@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client"
 import express from "express"
-import mw from "../middlewares/mw"
+import mw from "../middlewares/mw.js"
 const prisma = new PrismaClient()
 const app = express()
 
@@ -14,10 +14,16 @@ const makeMenuRoutes = ({ app }) => {
     mw(async (req, res, next) => {
       const navigationMenu = await prisma.navigationMenu
         .findMany({})
+        .then((navigationMenu) => {
+          res.status(200).send(navigationMenu)
+        })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message || `Some error occured when retrieving menu items`,
+          })
           next(error)
         })
-      res.send(navigationMenu)
     })
   )
 
@@ -25,16 +31,23 @@ const makeMenuRoutes = ({ app }) => {
     "/menu/:id",
     mw(async (req, res, next) => {
       const { id } = req.params
-      const navigationMenu = await prisma.navigationMenu
+      const menuItem = await prisma.navigationMenu
         .findFirstOrThrow({
           where: {
             id: id,
           },
         })
+        .then((menuItem) => {
+          res.status(200).send(menuItem)
+        })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message ||
+              `Some error occured when retrieving menu item with id ${id}`,
+          })
           next(error)
         })
-      res.send(navigationMenu)
     })
   )
 
@@ -42,17 +55,22 @@ const makeMenuRoutes = ({ app }) => {
     "/menu",
     mw(async (req, res, next) => {
       const { name, list } = req.body
-      const user = await prisma.user
+      const menuItem = await prisma.navigationMenu
         .create({
           data: {
             name: name,
             list: list,
           },
         })
+        .then((menuItem) => {
+          res.status(200).send(menuItem)
+        })
         .catch((error) => {
+          res.status(500).send({
+            message: error.message || `Some error occured when creating menu`,
+          })
           next(error)
         })
-      res.send(navigationMenu)
     })
   )
 
@@ -66,10 +84,17 @@ const makeMenuRoutes = ({ app }) => {
             id: id,
           },
         })
+        .then((navigationMenu) => {
+          res.status(200).send(navigationMenu)
+        })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message ||
+              `Some error occured when trying to delete menu with id ${id}`,
+          })
           next(error)
         })
-      res.send(navigationMenu)
     })
   )
 
@@ -78,7 +103,7 @@ const makeMenuRoutes = ({ app }) => {
     mw(async (req, res, next) => {
       const { id } = req.params
       const { name, list } = req.body
-      const user = await prisma
+      const navigationMenu = await prisma
         .update({
           when: {
             id: id,
@@ -88,10 +113,17 @@ const makeMenuRoutes = ({ app }) => {
             list: list,
           },
         })
+        .then((navigationMenu) => {
+          res.status(200).send(navigationMenu)
+        })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message ||
+              `Some error occured when trying to update menu with id ${id}`,
+          })
           next(error)
         })
-      res.send(navigationMenu)
     })
   )
 }

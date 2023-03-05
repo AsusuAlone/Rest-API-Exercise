@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client"
 import express from "express"
-import mw from "../middlewares/mw"
+import mw from "../middlewares/mw.js"
 const prisma = new PrismaClient()
 const app = express()
 
@@ -12,10 +12,16 @@ const makeUserRoutes = ({ app }) => {
         .findMany({
           include: { role: true },
         })
+        .then((users) => {
+          res.status(200).send(users)
+        })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message || `Some error occured when retrieving users`,
+          })
           next(error)
         })
-      res.send(users)
     })
   )
 
@@ -32,31 +38,47 @@ const makeUserRoutes = ({ app }) => {
             role: true,
           },
         })
+        .then((user) => {
+          res.status(200).send(user)
+        })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message ||
+              `Some error occured when retrieving user with id ${id}`,
+          })
           next(error)
         })
-      res.send(user)
     })
   )
 
   app.post(
     "/user",
     mw(async (req, res, next) => {
-      const { firstname, lastname, password, email, role } = req.body
-      const user = await prisma.user
-        .create({
-          data: {
-            firstname: firstname,
-            lastname: lastname,
-            email: email,
-            password: password,
-            role: role,
+      const { firstname, lastname, password, email, role: name } = req.body
+      const user = await prisma.user.create({
+        data: {
+          firstname: firstname,
+          lastname: lastname,
+          email: email,
+          password: password,
+          role: {
+            name: name,
           },
+        },
+      })
+      res
+        .status(200)
+        .send({
+          message: `User have been created successfully`,
         })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message || `Some error occurred when trying to create user`,
+          })
           next(error)
         })
-      res.send(user)
     })
   )
 
@@ -64,16 +86,24 @@ const makeUserRoutes = ({ app }) => {
     "/user/:id",
     mw(async (req, res, next) => {
       const { id } = req.params
-      const user = await prisma
-        .delete({
-          when: {
-            id: id,
-          },
+      const user = await prisma.delete({
+        when: {
+          id: id,
+        },
+      })
+      res
+        .status(200)
+        .send({
+          message: `User have been deleted successfully`,
         })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message ||
+              `Some error occurred when trying to delete user with id : ${id}`,
+          })
           next(error)
         })
-      res.send(user)
     })
   )
 
@@ -81,24 +111,34 @@ const makeUserRoutes = ({ app }) => {
     "/user/:id",
     mw(async (req, res, next) => {
       const { id } = req.params
-      const { firstname, lastname, password, email, role } = req.body
-      const user = await prisma
-        .update({
-          when: {
-            id: id,
+      const { firstname, lastname, password, email, role: name } = req.body
+      const user = await prisma.update({
+        when: {
+          id: id,
+        },
+        data: {
+          firstname: firstname,
+          lastname: lastname,
+          password: password,
+          email: email,
+          role: {
+            name: name,
           },
-          data: {
-            firstname: firstname,
-            lastname: lastname,
-            password: password,
-            email: email,
-            role: role,
-          },
+        },
+      })
+      res
+        .status(200)
+        .send({
+          message: `User have been updated successfully`,
         })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message ||
+              `Some error occurred when trying to update user with id : ${id}`,
+          })
           next(error)
         })
-      res.send(user)
     })
   )
 }

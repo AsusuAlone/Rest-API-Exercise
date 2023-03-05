@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client"
 import express from "express"
-import mw from "../middlewares/mw"
+import mw from "../middlewares/mw.js"
 const prisma = new PrismaClient()
 const app = express()
 
@@ -18,10 +18,16 @@ const makePageRoutes = ({ app }) => {
             user: true,
           },
         })
+        .then((pages) => {
+          res.status(200).send(pages)
+        })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message || "Some error occured when retrieving pages",
+          })
           next(error)
         })
-      res.send(pages)
     })
   )
 
@@ -38,10 +44,17 @@ const makePageRoutes = ({ app }) => {
             user: true,
           },
         })
+        .then((page) => {
+          res.status(200).send(page)
+        })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message ||
+              `Some error occured when retrieving page with id ${id}`,
+          })
           next(error)
         })
-      res.send(page)
     })
   )
 
@@ -57,22 +70,30 @@ const makePageRoutes = ({ app }) => {
         publicationDateTime,
         status,
       } = req.body
-      const page = await prisma.page
-        .create({
-          data: {
-            title: title,
-            content: content,
-            urlSlug: urlSlug,
-            creator: creator,
-            user: user,
-            publicationDateTime: publicationDateTime,
-            status: status,
-          },
+      const page = await prisma.page.create({
+        data: {
+          title: title,
+          content: content,
+          urlSlug: urlSlug,
+          creator: creator,
+          user: user,
+          publicationDateTime: publicationDateTime,
+          status: status,
+        },
+      })
+      res
+        .status(200)
+        .send({
+          message: `Page has been created successfully`,
         })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message ||
+              `Some error occurred when trying to create page with id : ${id}`,
+          })
           next(error)
         })
-      res.send(page)
     })
   )
 
@@ -80,16 +101,24 @@ const makePageRoutes = ({ app }) => {
     "/page/:id",
     mw(async (req, res, next) => {
       const { id } = req.params
-      const page = await prisma
-        .delete({
-          when: {
-            id: id,
-          },
+      const page = await prisma.delete({
+        when: {
+          id: id,
+        },
+      })
+      res
+        .status(200)
+        .send({
+          message: `Page have been deleted successfully`,
         })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message ||
+              `Some error occurred when trying to delete with id : ${id}`,
+          })
           next(error)
         })
-      res.send(page)
     })
   )
 
@@ -106,25 +135,33 @@ const makePageRoutes = ({ app }) => {
         publicationDateTime,
         status,
       } = req.body
-      const page = await prisma
-        .update({
-          when: {
-            id: id,
-          },
-          data: {
-            title: title,
-            content: content,
-            urlSlug: urlSlug,
-            creator: creator,
-            user: user,
-            publicationDateTime: publicationDateTime,
-            status: status,
-          },
+      const page = await prisma.update({
+        when: {
+          id: id,
+        },
+        data: {
+          title: title,
+          content: content,
+          urlSlug: urlSlug,
+          creator: creator,
+          user: user,
+          publicationDateTime: publicationDateTime,
+          status: status,
+        },
+      })
+      res
+        .status(200)
+        .send({
+          message: `Page have been updated successfully`,
         })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message ||
+              `Some error occurred when trying to update page with id : ${id}`,
+          })
           next(error)
         })
-      res.send(page)
     })
   )
 }

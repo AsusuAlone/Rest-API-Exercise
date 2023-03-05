@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client"
 import express from "express"
-import mw from "../middlewares/mw"
+import mw from "../middlewares/mw.js"
 const prisma = new PrismaClient()
 const app = express()
 
@@ -16,10 +16,16 @@ const makeRoleRoutes = ({ app }) => {
         .findMany({
           include: { User: true },
         })
+        .then((roles) => {
+          res.status(200).send(roles)
+        })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message || `Some error occured when retrieving roles`,
+          })
           next(error)
         })
-      res.send(roles)
     })
   )
 
@@ -36,10 +42,17 @@ const makeRoleRoutes = ({ app }) => {
             User: true,
           },
         })
+        .then((role) => {
+          res.status(200).send(role)
+        })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message ||
+              `Some error occured when retrieving role with id ${id}`,
+          })
           next(error)
         })
-      res.send(role)
     })
   )
 
@@ -47,19 +60,26 @@ const makeRoleRoutes = ({ app }) => {
     "/role",
     mw(async (req, res, next) => {
       const { name, User: firstname } = req.body
-      const role = await prisma.role
-        .create({
-          data: {
-            name: name,
-            User: {
-              User: firstname,
-            },
+      const role = await prisma.role.create({
+        data: {
+          name: name,
+          User: {
+            User: firstname,
           },
+        },
+      })
+      res
+        .status(200)
+        .send({
+          message: `Role have been created successfully`,
         })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message || `Some error occurred when trying to create role`,
+          })
           next(error)
         })
-      res.send(role)
     })
   )
 
@@ -67,16 +87,24 @@ const makeRoleRoutes = ({ app }) => {
     "/role/:id",
     mw(async (req, res, next) => {
       const { id } = req.params
-      const role = await prisma
-        .delete({
-          when: {
-            id: id,
-          },
+      const role = await prisma.delete({
+        when: {
+          id: id,
+        },
+      })
+      res
+        .status(200)
+        .send({
+          message: `Role have been deleted successfully`,
         })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message ||
+              `Some error occurred when trying to delete role with id : ${id}`,
+          })
           next(error)
         })
-      res.send(role)
     })
   )
 
@@ -85,19 +113,27 @@ const makeRoleRoutes = ({ app }) => {
     mw(async (req, res, next) => {
       const { id } = req.params
       const { name } = req.body
-      const role = await prisma
-        .update({
-          when: {
-            id: id,
-          },
-          data: {
-            name: name,
-          },
+      const role = await prisma.update({
+        when: {
+          id: id,
+        },
+        data: {
+          name: name,
+        },
+      })
+      res
+        .status(200)
+        .send({
+          message: `Role have been update successfully`,
         })
         .catch((error) => {
+          res.status(500).send({
+            message:
+              error.message ||
+              `Some error occurred when trying to update role with id : ${id}`,
+          })
           next(error)
         })
-      res.send(role)
     })
   )
 }

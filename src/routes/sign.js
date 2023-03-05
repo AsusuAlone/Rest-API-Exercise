@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client"
 import express from "express"
 import jsonwebtoken from "jsonwebtoken"
 import { InvalidCredentialsError } from "../errors.js"
-import mw from "../middlewares/mw"
+import mw from "../middlewares/mw.js"
 const prisma = new PrismaClient()
 const app = express()
 
